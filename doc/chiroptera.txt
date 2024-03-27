@@ -1,0 +1,94 @@
+*chiroptera.txt*  A perceptually uniform Vim and Neovim colorscheme
+
+
+                                 CHIROPTERA
+
+                                                                  *chiroptera*
+chiroptera is a generated |:colorscheme| for Vim and Neovim.  It provides
+dark and light palettes, each with hard, normal, and soft background
+contrast.
+
+
+CONTENTS                                                 *chiroptera-contents*
+
+        |chiroptera-installation|       Install chiroptera
+        |chiroptera-colorschemes|       Choose a colorscheme variant
+        |chiroptera-options|            Configure chiroptera
+        |chiroptera-troubleshooting|    Solve common problems
+
+
+==============================================================================
+INSTALLATION                                         *chiroptera-installation*
+
+Install chiroptera with your preferred plugin manager.  For example, with
+vim-plug: >
+
+        Plug 'dawikur/chiroptera'
+<
+
+Then select one of the available variants: >
+
+        colorscheme chiroptera_dark_normal
+<
+
+Next: |chiroptera-colorschemes|  Return to |chiroptera|
+
+
+==============================================================================
+COLORSCHEMES                                         *chiroptera-colorschemes*
+
+The available colorschemes are: >
+
+        chiroptera_dark_hard     chiroptera_light_hard
+        chiroptera_dark_normal   chiroptera_light_normal
+        chiroptera_dark_soft     chiroptera_light_soft
+<
+
+The contrast suffix changes backgrounds and subtle background highlights;
+foreground roles remain stable within each light or dark mode.
+
+hard    strongest normal-text contrast
+normal  meets WCAG AA for normal text
+soft    lower-contrast appearance; use bright syntax groups when stronger
+        contrast is required
+
+Next: |chiroptera-options|  Return to |chiroptera|
+
+
+==============================================================================
+OPTIONS                                                   *chiroptera-options*
+
+                                                *g:chiroptera_italic_comments*
+g:chiroptera_italic_comments
+
+Controls whether comments are rendered in italics.  It defaults to enabled.
+Set it before loading a chiroptera colorscheme: >
+
+        let g:chiroptera_italic_comments = 0
+<
+
+Then load the selected variant: >
+
+        colorscheme chiroptera_dark_normal
+<
+
+Next: |chiroptera-troubleshooting|  Return to |chiroptera|
+
+
+==============================================================================
+TROUBLESHOOTING                                   *chiroptera-troubleshooting*
+
+If |:colorscheme| cannot find a chiroptera variant, make sure the plugin
+manager has installed the repository and that its directory is on
+|'runtimepath'|.  Use |:colorscheme| followed by <Tab> to inspect the names
+currently available.
+
+For terminals, enable |'termguicolors'| when true-color support is available: >
+
+        set termguicolors
+<
+
+Return to |chiroptera|
+
+==============================================================================
+vim:tw=78:ts=8:noet:ft=help:norl:

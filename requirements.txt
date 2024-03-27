@@ -1,0 +1,13 @@
+Pygments
+scikit-image
+tqdm
+black==25.11.0
+basedpyright
+build
+isort
+mypy
+pre-commit
+pylint
+pytest
+pytest-cov
+twine

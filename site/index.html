@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="A LAB-space color system generator for coherent developer tools.">
+	<link rel="canonical" href="https://dawikur.dev/chiroptera">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://dawikur.dev/chiroptera">
+	<meta property="og:title" content="chiroptera · color system generator">
+	<meta property="og:description" content="A LAB-space color system generator for coherent developer tools.">
+	<meta property="og:image" content="https://dawikur.dev/chiroptera/assets/og_preview.png">
+	<meta property="og:image:type" content="image/png">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="630">
+	<meta property="og:image:alt" content="chiroptera color system generator with dark and light Neovim previews.">
+	<meta name="twitter:card" content="summary_large_image">
+	<title>chiroptera color system generator</title>
+	<link rel="icon" href="assets/chiroptera.svg" type="image/svg+xml">
+	<script src="assets/site-ui/theme.js"></script>
+	<link rel="stylesheet" href="assets/site-ui/foundation.css">
+	<link rel="stylesheet" href="assets/site-ui/components.css">
+	<link rel="stylesheet" href="palette.css">
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<main class="page">
+		<div class="controls ui-control-dock ui-control-dock--grid-at-mobile" aria-label="Palette controls">
+			<div class="ui-segmented ui-theme-control" role="group" aria-label="Color mode">
+				<button class="ui-segmented-option ui-theme-option" type="button" data-theme-mode="auto">Auto</button>
+				<button class="ui-segmented-option ui-theme-option" type="button" data-theme-mode="light">Light</button>
+				<button class="ui-segmented-option ui-theme-option" type="button" data-theme-mode="dark">Dark</button>
+			</div>
+			<div class="ui-segmented ui-segmented--contrast ui-contrast-control" role="group" aria-label="Contrast level">
+				<button class="ui-segmented-option" type="button" data-contrast="hard">Hard</button>
+				<button class="ui-segmented-option" type="button" data-contrast="normal">Normal</button>
+				<button class="ui-segmented-option" type="button" data-contrast="soft">Soft</button>
+			</div>
+		</div>
+		<p class="contrast-note" id="contrast-note" aria-live="polite"></p>
+		<section class="hero" aria-labelledby="page-title">
+			<div class="copy">
+				<p class="eyebrow"><a class="ui-back-link" href="../" data-site-back data-state-transfer hidden>← dawikur.dev</a><span data-site-back-separator hidden> · </span>Color system generator</p>
+				<h1 id="page-title">chiroptera</h1>
+				<p class="lede">A perceptually uniform color system built in LAB space. Generate coherent palettes and semantic tokens for every local tool, from editors to terminals and dotfiles.</p>
+				<div class="feature-strip" aria-label="Highlights">
+					<span class="ui-tag">2 modes</span><span class="ui-tag">3 contrast levels</span><span class="ui-tag">tool-agnostic templates</span>
+				</div>
+				<div class="actions">
+					<a class="ui-action" href="#generator">Use the generator</a>
+					<a class="ui-action" href="#palette">Explore palette</a>
+					<a class="ui-action" href="https://github.com/dawikur/chiroptera">View on GitHub</a>
+				</div>
+			</div>
+			<figure class="wing-figure">
+				<img id="palette-wing" src="assets/chiroptera.svg" alt="A geometric bat with mirrored light and dark wings made from the chiroptera palette. Click a segment to select its mode and contrast.">
+				<figcaption>Two wings × three tensions</figcaption>
+			</figure>
+		</section>
+
+		<section class="editor-preview" id="editor-preview" aria-labelledby="editor-preview-title">
+			<div class="editor-preview-copy">
+				<p class="eyebrow">Real editor preview</p>
+				<h2 id="editor-preview-title">One renderer, running in Neovim.</h2>
+				<p>This captured terminal session is a real integration, not a browser recreation. It follows the selected mode and contrast level above.</p>
+			</div>
+			<figure class="editor-shot">
+				<img class="ui-card ui-card--flush" id="editor-screenshot" src="assets/screenshots/chiroptera_dark_normal.png" width="800" height="600" alt="Neovim editing a Python file with the chiroptera dark normal colorscheme.">
+				<figcaption id="editor-screenshot-caption" aria-live="polite">Neovim · dark normal · Python</figcaption>
+			</figure>
+		</section>
+
+		<section class="generator" id="generator" aria-labelledby="generator-title">
+			<div class="generator-copy">
+				<p class="eyebrow">Template generator</p>
+				<h2 id="generator-title">One color system, your local tools.</h2>
+				<p>Chiroptera is a Python generator for coherent local tooling. The CLI exposes every palette and semantic color token, so any text configuration can become a template.</p>
+				<p>The included Vim template is the first renderer. A terminal, editor, launcher or dotfile can use the same tokens and be regenerated when you switch mode or contrast.</p>
+			</div>
+			<div class="generator-examples">
+				<div>
+					<h3>Inspect a palette</h3>
+					<pre class="command ui-code"><code id="inspect-command"></code></pre>
+				</div>
+				<div>
+					<h3>Render your template</h3>
+					<pre class="command ui-code"><code id="render-command"></code></pre>
+				</div>
+				<p class="token-note">For example: <code>{bg.hex}</code>, <code>{red.bright.hex}</code>, <code>{fg.normal.hex}</code>, and RGB/ANSI variants such as <code>{bg.rgb}</code>. Literal braces outside known tokens stay unchanged.</p>
+			</div>
+			<div class="template-pair">
+				<div>
+					<h3>Vim template</h3>
+					<pre class="command ui-code"><code id="template-sample"></code></pre>
+				</div>
+				<div>
+					<h3 id="generated-template-title">Generated Vim · dark normal</h3>
+					<pre class="command ui-code"><code id="generated-template"></code></pre>
+				</div>
+			</div>
+		</section>
+
+		<section class="lab-section" aria-labelledby="lab-title">
+			<div class="lab-copy">
+				<p class="eyebrow">Perceptual geometry</p>
+				<h2 id="lab-title">Distances, not guessed brightness.</h2>
+				<p>Each lane places one semantic color family on the CIE LAB lightness axis. Equal spacing in <code>L*</code> corresponds to an equal perceived change in brightness.</p>
+				<p class="lab-note">The diagram follows the selected mode and contrast. Dashed outlines show background tension, context backgrounds, and stable text roles.</p>
+			</div>
+			<div class="lab-chart-wrap ui-card ui-card--compact">
+				<svg id="lab-chart" viewBox="0 0 760 390" role="img" aria-label="LAB lightness relationships for the selected chiroptera palette"></svg>
+				<span class="lab-tooltip ui-tooltip" id="lab-tooltip" role="tooltip" hidden></span>
+			</div>
+		</section>
+
+		<section class="palette-section" id="palette" aria-labelledby="palette-title">
+			<div class="section-head">
+				<div>
+					<p class="eyebrow">Generated palette</p>
+					<h2 class="palette-comment ui-tag" id="palette-title">24 color roles · click a swatch to copy</h2>
+				</div>
+			</div>
+			<div class="palette" id="palette-grid"></div>
+		</section>
+
+		<section class="principles" aria-label="Design principles">
+			<article><h2>Perceptual steps</h2><p>LAB interpolation keeps the tint progression visually even instead of merely numerically even.</p></article>
+			<article><h2>Stable foreground roles</h2><p>Foreground colors stay fixed within each mode while hard, normal and soft tune the background contrast.</p></article>
+			<article><h2>Three color roles</h2><p>Dim colors define subtle context, normal colors support UI, and bright colors carry syntax.</p></article>
+		</section>
+	</main>
+	<button class="ui-scroll-top scroll-top" type="button" hidden aria-label="Scroll to top">↑</button>
+	<script src="palette.js"></script>
+	<script src="generated-sample.js"></script>
+	<script src="app.js"></script>
+	<script src="assets/site-ui/scroll-top.js"></script>
+</body>
+</html>

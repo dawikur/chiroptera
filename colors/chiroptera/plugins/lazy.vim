@@ -1,0 +1,16 @@
+" Copyright (c) 2026 Dawid Kurek <hello@dawikur.dev>
+
+call ChiropteraLN('LazyNormal', 'NormalFloat')
+call ChiropteraLN('LazyButton', 'CursorLine')
+call ChiropteraLN('LazyButtonActive', 'Visual')
+call ChiropteraLN('LazyComment', 'Comment')
+call ChiropteraLN('LazyError', 'DiagnosticError')
+call ChiropteraLN('LazyWarning', 'DiagnosticWarn')
+call ChiropteraLN('LazyInfo', 'DiagnosticInfo')
+call ChiropteraLN('LazyH1', 'IncSearch')
+call ChiropteraHL('LazyH2', g:chiroptera.fg.mark, g:chiroptera.none, 'bold')
+call ChiropteraHL('LazyDimmed', g:chiroptera.fg.ignore, g:chiroptera.none)
+call ChiropteraHL('LazyDir', g:chiroptera.fg.blue, g:chiroptera.none)
+call ChiropteraHL('LazyProgressDone', g:chiroptera.fg.green, g:chiroptera.none)
+call ChiropteraHL('LazyProgressTodo', g:chiroptera.fg.note, g:chiroptera.none)
+call ChiropteraHL('LazyUrl', g:chiroptera.fg.cyan, g:chiroptera.none, 'underline')

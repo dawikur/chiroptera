@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <clipPath id="dark-page"><polygon points="0,0 1200,0 1200,630 0,340"/></clipPath>
+    <clipPath id="light-page"><polygon points="0,340 1200,630 1200,630 0,630"/></clipPath>
+    <clipPath id="dark-editor"><polygon points="600,116 1120,116 1120,361 600,235"/></clipPath>
+    <clipPath id="light-editor"><polygon points="600,235 1120,361 1120,506 600,506"/></clipPath>
+    <clipPath id="editor-frame"><rect x="576" y="92" width="568" height="438" rx="16"/></clipPath>
+    <clipPath id="dark-frame"><polygon points="576,92 1144,92 1144,372.15915 576,234.5286"/></clipPath>
+    <clipPath id="light-frame"><polygon points="576,234.5286 1144,372.15915 1144,530 576,530"/></clipPath>
+    <filter id="frame-shadow" x="-10%" y="-10%" width="120%" height="130%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
+      <feOffset in="blur" dx="0" dy="6" result="offset-blur"/>
+      <feComponentTransfer in="offset-blur">
+        <feFuncA type="linear" slope="0.22"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" style="fill:#373736" inkscape:label="dark.normal.bg"/>
+  <polygon points="0,340 1200,630 1200,630 0,630" style="fill:#dbd7c3" inkscape:label="light.normal.bg"/>
+  <g clip-path="url(#dark-page)">
+    <rect x="64" y="74" width="7" height="482" rx="3.5" style="fill:#70c1a6" inkscape:label="dark.normal.cyan.bright"/>
+    <text x="104" y="154" style="fill:#70c1a6;font-family:Inter,Arial,sans-serif;font-size:22px;font-weight:700;letter-spacing:3px" inkscape:label="dark.normal.cyan.bright">COLOR SYSTEM GENERATOR</text>
+    <text x="100" y="287" style="fill:#c9c6b6;font-family:Inter,Arial,sans-serif;font-size:82px;font-weight:700;letter-spacing:-3px" inkscape:label="dark.normal.fg.bright">chiroptera</text>
+    <text x="104" y="350" style="fill:#b5b2a2;font-family:Inter,Arial,sans-serif;font-size:29px" inkscape:label="dark.normal.fg">Coherent palettes and tokens</text>
+    <text x="104" y="389" style="fill:#b5b2a2;font-family:Inter,Arial,sans-serif;font-size:29px" inkscape:label="dark.normal.fg">for every local tool.</text>
+    <text x="104" y="442" style="fill:#908e83;font-family:Inter,Arial,sans-serif;font-size:23px" inkscape:label="dark.normal.fg.dim">LAB space · dark and light modes</text>
+    <text x="104" y="474" style="fill:#908e83;font-family:Inter,Arial,sans-serif;font-size:23px" inkscape:label="dark.normal.fg.dim">hard, normal and soft contrast</text>
+  </g>
+  <g clip-path="url(#light-page)">
+    <rect x="64" y="74" width="7" height="482" rx="3.5" style="fill:#006048" inkscape:label="light.normal.cyan.bright"/>
+    <text x="104" y="154" style="fill:#006048;font-family:Inter,Arial,sans-serif;font-size:22px;font-weight:700;letter-spacing:3px" inkscape:label="light.normal.cyan.bright">COLOR SYSTEM GENERATOR</text>
+    <text x="100" y="287" style="fill:#575652;font-family:Inter,Arial,sans-serif;font-size:82px;font-weight:700;letter-spacing:-3px" inkscape:label="light.normal.fg.bright">chiroptera</text>
+    <text x="104" y="350" style="fill:#5d5c5a;font-family:Inter,Arial,sans-serif;font-size:29px" inkscape:label="light.normal.fg">Coherent palettes and tokens</text>
+    <text x="104" y="389" style="fill:#5d5c5a;font-family:Inter,Arial,sans-serif;font-size:29px" inkscape:label="light.normal.fg">for every local tool.</text>
+    <text x="104" y="442" style="fill:#77756f;font-family:Inter,Arial,sans-serif;font-size:23px" inkscape:label="light.normal.fg.dim">LAB space · dark and light modes</text>
+    <text x="104" y="474" style="fill:#77756f;font-family:Inter,Arial,sans-serif;font-size:23px" inkscape:label="light.normal.fg.dim">hard, normal and soft contrast</text>
+  </g>
+  <rect x="576" y="92" width="568" height="438" rx="16" fill="#000000" filter="url(#frame-shadow)"/>
+  <rect x="576" y="92" width="568" height="438" rx="16" style="fill:#62615b" inkscape:label="dark.normal.bg.bright"/>
+  <polygon points="576,234.5286 1144,372.15915 1144,530 576,530" style="fill:#9d9a8d" inkscape:label="light.normal.bg.bright" clip-path="url(#editor-frame)"/>
+  <rect x="576" y="304.15625" width="568" height="13.6875" style="fill:#373736" inkscape:label="dark.normal.bg" clip-path="url(#dark-frame)"/>
+  <rect x="576" y="304.15625" width="568" height="13.6875" style="fill:#dbd7c3" inkscape:label="light.normal.bg" clip-path="url(#light-frame)"/>
+  <image xlink:href="screenshots/chiroptera_dark_normal.png" x="600" y="116" width="520" height="390" preserveAspectRatio="none" clip-path="url(#dark-editor)"/>
+  <image xlink:href="screenshots/chiroptera_light_normal.png" x="600" y="116" width="520" height="390" preserveAspectRatio="none" clip-path="url(#light-editor)"/>
+  <g clip-path="url(#dark-page)">
+    <text x="600" y="570" style="fill:#908e83;font-family:ui-monospace,monospace;font-size:18px" inkscape:label="dark.normal.fg.dim">Neovim · dark / light normal · Python</text>
+  </g>
+  <g clip-path="url(#light-page)">
+    <text x="600" y="570" style="fill:#77756f;font-family:ui-monospace,monospace;font-size:18px" inkscape:label="light.normal.fg.dim">Neovim · dark / light normal · Python</text>
+  </g>
+</svg>

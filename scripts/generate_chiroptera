@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+# Copyright (c) 2024-2026 Dawid Kurek <hello@dawikur.dev>
+"""Generate colorscheme files and recolor visual assets.
+
+This script generates 6 vim colorscheme files (dark/light × hard/normal/soft)
+from template files and recolors SVG artwork and the social preview image.
+
+Commands:
+    generate (default): Generate all colorscheme files and visual assets
+
+Example usage:
+    python scripts/generate_chiroptera
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+from typing import cast
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_DIR = SCRIPT_DIR.parent
+
+sys.path.insert(0, str(REPO_DIR))
+from chiroptera.palette import (  # pylint: disable=wrong-import-position
+    Contrast,
+    Mode,
+    Palette,
+)
+from chiroptera.scheme import Scheme  # pylint: disable=wrong-import-position
+from chiroptera.utils import format_lines  # pylint: disable=wrong-import-position
+
+
+def recolore_svg(
+    palette: dict[str, dict[str, Palette]],
+    template_name: str,
+    output_name: str,
+    output_dir: Path,
+) -> Path:
+    """Recolor SVG using Inkscape labels as color names.
+
+    Reads an SVG template and writes its generated counterpart with fill colors
+    based on Inkscape labels (format: "{mode}.{contrast}.{color}").
+
+    Args:
+        palette: Nested dict of palettes [mode][contrast] -> Palette
+    """
+
+    print(f"Recoloring {output_name}")
+
+    svg_tmpl = REPO_DIR / "site" / "assets" / template_name
+    svg_file = output_dir / output_name
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    if not svg_tmpl.exists():
+        print(f"Error: SVG template not found: {svg_tmpl.relative_to(REPO_DIR)}")
+        sys.exit(1)
+
+    tree = ET.parse(svg_tmpl)
+    root: ET.Element = tree.getroot()
+
+    label_attr = "{http://www.inkscape.org/namespaces/inkscape}label"
+
+    def _process_svg_node(node: ET.Element) -> None:
+        """Recursively process SVG nodes and update fill colors based on Inkscape labels.
+
+        Traverses the SVG tree depth-first, updating CSS fill colors for elements
+        whose Inkscape label matches the pattern: "{mode}-{contrast}-{color}"
+        (e.g., "dark-hard-bg" or "light-soft-red").
+
+        Args:
+            node: XML element node to process (recursively processes all children)
+        """
+        for child in node:
+            # Process children first (depth-first traversal)
+            _process_svg_node(child)
+
+            # Skip nodes without Inkscape labels
+            if label_attr not in child.attrib:
+                continue
+
+            label = child.attrib[label_attr]
+            # Skip the default layer
+            if label == "Layer 1":
+                continue
+
+            # Parse label format: "dark.hard.bg" -> mode="dark", contrast="hard", color="bg"
+            mode, contrast, color = label.split(".", 2)
+
+            # Parse and update CSS style
+            css_raw = child.attrib["style"].split(";")
+            css = {x.split(":")[0]: x.split(":")[1] for x in css_raw if x}
+
+            # Update fill color from palette
+            css["fill"] = cast(str, palette[mode][contrast][color]["hex"])
+
+            # Reconstruct CSS string
+            css_text = ";".join([f"{k}:{v}" for k, v in css.items()])
+
+            child.attrib["style"] = css_text
+
+    _process_svg_node(root)
+
+    tree.write(svg_file)
+    with svg_file.open("ab") as svg:
+        _ = svg.write(b"\n")
+    return svg_file
+
+
+def generate_file(
+    palette: dict[str, dict[str, Palette]],
+    path: Path,
+    file_name: str,
+    suffix: str | None,
+) -> None:
+    """Generate colorscheme files from templates.
+
+    Reads template file and generates 6 variants by replacing placeholders
+    with palette colors.
+
+    Args:
+        palette: Nested dict of palettes [mode][contrast] -> Palette
+        path: Directory containing template and output files
+        file_name: Base filename (without suffix)
+        suffix: File extension (e.g., "vim")
+    """
+
+    print(f"Generating {path.relative_to(REPO_DIR)}/{file_name}'s")
+
+    file_tmpl = path / f"{file_name}_tmpl"
+    if suffix is not None:
+        file_tmpl = file_tmpl.with_suffix(f".{suffix}")
+
+    if not file_tmpl.exists():
+        print(f"Error: Template file not found: {file_tmpl.relative_to(REPO_DIR)}")
+        sys.exit(1)
+
+    for mode in palette:
+        for contrast in palette[mode]:
+            file = path / f"{file_name}_{mode}_{contrast}"
+            if suffix is not None:
+                file = file.with_suffix(f".{suffix}")
+
+            palette_obj = palette[mode][contrast]
+            scheme_obj = Scheme(palette_obj)
+
+            # Combine tokens from both Palette and Scheme
+            # This allows templates to use either old palette tokens (e.g. {fg.hex})
+            # or new scheme tokens (e.g. {fg.normal.hex})
+            tokens = {
+                **palette_obj.add_rgb().flatten(),
+                **scheme_obj.add_rgb().flatten(),
+                "name": "chiroptera",
+                "mode": f"{mode}",
+                "contrast": f"{contrast}",
+            }
+
+            lines = format_lines(file_tmpl.read_text().splitlines(True), tokens)
+            _ = file.write_text("".join(lines))
+
+
+def generate_files(palette: dict[str, dict[str, Palette]]) -> None:
+    """Generate files based on the palette."""
+
+    generate_file(palette, REPO_DIR / "colors", "chiroptera", "vim")
+
+
+def generate(output_dir: Path = REPO_DIR / "site" / "assets") -> int:
+    """Generate colorscheme files and visual assets.
+
+    Creates all 6 colorscheme variants and updates SVG previews. The PNG Open
+    Graph image is generated together with terminal screenshots.
+
+    Returns:
+        Exit code (0 for success)
+    """
+    palette = {
+        "dark": {
+            "hard": Palette(Mode.DARK, Contrast.HARD),
+            "normal": Palette(Mode.DARK, Contrast.NORMAL),
+            "soft": Palette(Mode.DARK, Contrast.SOFT),
+        },
+        "light": {
+            "hard": Palette(Mode.LIGHT, Contrast.HARD),
+            "normal": Palette(Mode.LIGHT, Contrast.NORMAL),
+            "soft": Palette(Mode.LIGHT, Contrast.SOFT),
+        },
+    }
+
+    _ = recolore_svg(palette, "chiroptera_tmpl.svg", "chiroptera.svg", output_dir)
+    _ = recolore_svg(palette, "og_preview_tmpl.svg", "og_preview.svg", output_dir)
+    generate_files(palette)
+    return 0
+
+
+def main() -> int:
+    """Main function - parse arguments and execute command.
+
+    Returns:
+        Exit code (0 for success, 1 for error)
+    """
+    parser = argparse.ArgumentParser(
+        description="Generate chiroptera colorscheme files and visual assets"
+    )
+    _ = parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=REPO_DIR / "site" / "assets",
+        help="Directory for generated SVG assets",
+    )
+
+    args = parser.parse_args()
+    output_dir = cast(Path, args.output_dir)
+    return generate(output_dir)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

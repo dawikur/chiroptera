@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run pre-commit hooks
+      # pyupgrade v3.20 supports Python 3.9 but is incompatible with 3.14.
+      # Run the quality gate on the project's minimum supported Python.
+      if: matrix.python-version == '3.9'
+      run: |
+        pre-commit run --all-files
+
+    - name: Run tests with pytest
+      run: |
+        pytest tests/ -v --cov=chiroptera --cov-report=term-missing --cov-fail-under=100
+
+    - name: Test colorscheme generation
+      run: |
+        scripts/generate_chiroptera
+
+    - name: Smoke test generated colorschemes in Vim
+      run: |
+        set -euo pipefail
+        for scheme in chiroptera_dark_hard chiroptera_dark_normal chiroptera_dark_soft chiroptera_light_hard chiroptera_light_normal chiroptera_light_soft; do
+          vim -Nu NONE -n -es "+set rtp^=$GITHUB_WORKSPACE" "+colorscheme $scheme" '+qa'
+        done
+
+    - name: Build distribution artifacts
+      run: |
+        make package
+
+    - name: Validate distribution metadata
+      run: |
+        twine check dist/*
+
+    - name: Test installed wheel and CLI
+      run: |
+        python -m pip install --force-reinstall --no-deps dist/*.whl
+        chiroptera --dark --name '^bg$'
+
+    - name: Build publishable site
+      run: |
+        make site
+
+    - name: Upload generated colorschemes as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: colorschemes-python-${{ matrix.python-version }}
+        path: colors/chiroptera_*.vim
+        if-no-files-found: error

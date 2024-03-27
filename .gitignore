@@ -1,0 +1,34 @@
+# Python build artifacts
+build
+dist
+chiroptera.egg-info
+
+# Python bytecode and cache
+**/__pycache__/
+**/*.pyc
+
+# Virtual environments
+venv/
+.venv/
+.site-ui/
+env/
+ENV/
+
+# Claude Code CLI configuration
+.claude/
+
+# Testing artifacts
+.nvimlog
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Generated documentation data
+site/palette.js
+site/palette.css
+site/generated-sample.js
+site/generated-sample.vim
+site/assets/favicon.svg
+site/assets/favicon.png
+site/assets/og_preview.svg

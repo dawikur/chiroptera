@@ -1,0 +1,73 @@
+# Copyright (c) 2024-2026 Dawid Kurek <hello@dawikur.dev>
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chiroptera"
+version = "0.1.0"
+description = "LAB-space color system generator for coherent developer tools"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+    { name = "Dawid Kurek", email = "hello@dawikur.dev" },
+]
+keywords = ["color-system", "colorscheme", "templates", "terminal", "vim", "neovim", "lab"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Text Editors",
+]
+dependencies = [
+    "scikit-image",
+    "tqdm",
+    "Pygments",
+]
+
+[project.urls]
+Homepage = "https://dawikur.dev/chiroptera"
+Repository = "https://github.com/dawikur/chiroptera"
+Issues = "https://github.com/dawikur/chiroptera/issues"
+
+[tool.setuptools]
+packages = ["chiroptera"]
+script-files = ["bin/chiroptera"]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.black]
+target-version = ["py39"]
+
+[tool.mypy]
+pretty = true
+show_column_numbers = true
+strict = true
+ignore_missing_imports = true
+
+[tool.pyright]
+pythonVersion = "3.9"
+reportImplicitOverride = "none"
+
+[tool.pylint.'messages control']
+disable = ["import-error", "redefined-outer-name"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--verbose",
+    "--strict-markers",
+]
+filterwarnings = [
+    "error",
+]

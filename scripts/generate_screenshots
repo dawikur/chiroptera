@@ -1,0 +1,344 @@
+#!/usr/bin/env python3
+# Copyright (c) 2026 Dawid Kurek <hello@dawikur.dev>
+"""Capture every chiroptera colorscheme variant in a terminal Neovim session.
+
+The script isolates Neovim in its own tmux server, displays that session in an
+Alacritty window, and captures that window with ImageMagick.  It therefore
+produces screenshots of the real colorscheme rather than a browser imitation.
+Screenshots are versioned source assets in ``site/assets/screenshots/``.
+
+Example:
+    scripts/generate_screenshots
+    scripts/generate_screenshots --scheme chiroptera_dark_normal
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+from collections.abc import Iterable, Sequence
+from pathlib import Path
+from typing import cast
+
+REPO_DIR = Path(__file__).resolve().parent.parent
+SAMPLE_FILE = REPO_DIR / "site" / "screenshot_sample.py"
+DEFAULT_OUTPUT_DIR = REPO_DIR / "site" / "assets" / "screenshots"
+SCHEMES = (
+    "chiroptera_dark_hard",
+    "chiroptera_dark_normal",
+    "chiroptera_dark_soft",
+    "chiroptera_light_hard",
+    "chiroptera_light_normal",
+    "chiroptera_light_soft",
+)
+REQUIRED_COMMANDS = ("alacritty", "import", "nvim", "tmux", "wmctrl")
+WINDOW_COLUMNS = 104
+WINDOW_LINES = 32
+WINDOW_TITLE_PREFIX = "chiroptera-screenshot-"
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    _ = parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=DEFAULT_OUTPUT_DIR,
+        help="directory for PNG files (default: %(default)s)",
+    )
+    _ = parser.add_argument(
+        "--scheme",
+        action="append",
+        choices=SCHEMES,
+        help="capture only one scheme; may be provided more than once",
+    )
+    return parser.parse_args()
+
+
+def run(
+    command: Sequence[str],
+    *,
+    capture_output: bool = False,
+    cwd: Path | None = None,
+) -> subprocess.CompletedProcess[str]:
+    """Run a UTF-8 subprocess command and raise a helpful error on failure."""
+    return subprocess.run(
+        command, check=True, text=True, capture_output=capture_output, cwd=cwd
+    )
+
+
+def require_commands(commands: Iterable[str]) -> None:
+    """Exit before creating windows when a required external command is absent."""
+    missing = [command for command in commands if shutil.which(command) is None]
+    if missing:
+        raise RuntimeError(f"Required commands not found: {', '.join(missing)}")
+
+
+def require_x11_display() -> None:
+    """Verify that the X11 display used by wmctrl is accessible."""
+    result = subprocess.run(
+        ["wmctrl", "-l"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or "wmctrl could not connect to the display"
+        raise RuntimeError(
+            "An accessible X11 display is required for screenshots: " + detail
+        )
+
+
+def find_window_id(
+    title: str,
+    terminal: subprocess.Popen[str] | None = None,
+    timeout: float = 10.0,
+) -> str:
+    """Return the X11 window ID for an Alacritty window with ``title``."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if terminal is not None and terminal.poll() is not None:
+            error_output: object = terminal.stderr.read() if terminal.stderr else ""
+            error = (
+                error_output if isinstance(error_output, str) else str(error_output)
+            ).strip()
+            detail = f": {error}" if error else ""
+            raise RuntimeError(
+                f"Alacritty exited before creating window {title}{detail}"
+            )
+        windows = run(["wmctrl", "-l"], capture_output=True).stdout.splitlines()
+        for window in windows:
+            window_id, _, _, window_title = window.split(maxsplit=3)
+            if window_title == title:
+                return window_id
+        time.sleep(0.1)
+    raise RuntimeError(f"Timed out waiting for the terminal window: {title}")
+
+
+def stop_terminal(terminal: subprocess.Popen[str]) -> None:
+    """Stop the screenshot terminal without waiting indefinitely."""
+    if terminal.poll() is not None:
+        return
+    _ = terminal.terminate()
+    try:
+        _ = terminal.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        _ = terminal.kill()
+        _ = terminal.wait()
+
+
+def nvim_command(scheme: str) -> list[str]:
+    """Return the Neovim invocation used in every captured terminal."""
+    setup = " | ".join(
+        (
+            f"set rtp^={REPO_DIR}",
+            "set termguicolors",
+            "set number",
+            "set cursorline",
+            "set nowrap",
+            "set laststatus=0",
+            "set noshowmode",
+            "set noruler",
+            "set noshowcmd",
+            "set cmdheight=0",
+            "set signcolumn=no",
+            "filetype plugin indent on",
+            "syntax enable",
+            f"colorscheme {scheme}",
+        )
+    )
+    return [
+        "env",
+        "TERM=alacritty",
+        "COLORTERM=truecolor",
+        "nvim",
+        "-u",
+        "NONE",
+        "-n",
+        "--cmd",
+        setup,
+        "+setlocal filetype=python",
+        "+call cursor(16, 7)",
+        str(SAMPLE_FILE),
+    ]
+
+
+def capture_scheme(scheme: str, output_dir: Path) -> Path:
+    """Open ``scheme`` in tmux and save the terminal window as a PNG."""
+    title = f"{WINDOW_TITLE_PREFIX}{scheme}"
+    output = output_dir / f"{scheme}.png"
+
+    with tempfile.TemporaryDirectory(prefix="chiroptera-screenshot-") as temp_dir:
+        socket = Path(temp_dir) / "tmux.sock"
+        session = "screenshot"
+        try:
+            _ = run(
+                [
+                    "tmux",
+                    "-S",
+                    str(socket),
+                    "new-session",
+                    "-d",
+                    "-s",
+                    session,
+                    "-x",
+                    str(WINDOW_COLUMNS),
+                    "-y",
+                    str(WINDOW_LINES),
+                ]
+            )
+            _ = run(
+                [
+                    "tmux",
+                    "-S",
+                    str(socket),
+                    "set-option",
+                    "-as",
+                    "terminal-overrides",
+                    ",*:Tc",
+                ]
+            )
+            _ = run(["tmux", "-S", str(socket), "set-option", "-g", "status", "off"])
+            _ = run(
+                [
+                    "tmux",
+                    "-S",
+                    str(socket),
+                    "set-option",
+                    "-as",
+                    "terminal-features",
+                    ",alacritty:RGB",
+                ]
+            )
+            _ = run(
+                [
+                    "tmux",
+                    "-S",
+                    str(socket),
+                    "send-keys",
+                    "-t",
+                    f"{session}:0.0",
+                    shlex.join(nvim_command(scheme)),
+                    "Enter",
+                ]
+            )
+            terminal_env = {
+                **os.environ,
+                "WINIT_UNIX_BACKEND": "x11",
+            }
+            _ = terminal_env.pop("WAYLAND_DISPLAY", None)
+            _ = terminal_env.pop("WAYLAND_SOCKET", None)
+            with subprocess.Popen(
+                [
+                    "alacritty",
+                    "--title",
+                    title,
+                    "--class",
+                    "chiroptera-screenshot",
+                    "--option",
+                    f"window.dimensions.columns={WINDOW_COLUMNS}",
+                    "--option",
+                    f"window.dimensions.lines={WINDOW_LINES}",
+                    "--option",
+                    "window.padding.x=0",
+                    "--option",
+                    "window.padding.y=0",
+                    "--command",
+                    "tmux",
+                    "-S",
+                    str(socket),
+                    "attach-session",
+                    "-t",
+                    session,
+                ],
+                cwd=REPO_DIR,
+                env=terminal_env,
+                stderr=subprocess.PIPE,
+                text=True,
+            ) as terminal:
+                try:
+                    window_id = find_window_id(title, terminal)
+                    time.sleep(0.5)
+                    _ = run(["import", "-window", window_id, str(output)])
+                finally:
+                    stop_terminal(terminal)
+        finally:
+            _ = subprocess.run(
+                ["tmux", "-S", str(socket), "kill-server"],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+    return output
+
+
+def render_og_preview(output_dir: Path) -> Path:
+    """Render the Open Graph preview after screenshot assets are updated."""
+    og_preview = output_dir / "og_preview.svg"
+    og_output = output_dir / "og_preview.png"
+    inkscape = shutil.which("inkscape")
+    if inkscape is not None:
+        _ = run(
+            [
+                inkscape,
+                str(og_preview),
+                "--export-filename",
+                str(og_output.resolve()),
+                "--export-width",
+                "1200",
+                "--export-height",
+                "630",
+            ]
+        )
+        return og_output
+
+    imagemagick = shutil.which("magick") or shutil.which("convert")
+    if imagemagick is None:
+        raise RuntimeError("ImageMagick is required to render the Open Graph image")
+
+    _ = run(
+        [
+            imagemagick,
+            og_preview.name,
+            "-background",
+            "none",
+            "-resize",
+            "1200x630!",
+            str(og_output.resolve()),
+        ],
+        cwd=og_preview.parent,
+    )
+    return og_output
+
+
+def main() -> int:
+    """Capture every requested colorscheme screenshot."""
+    args = parse_args()
+    require_commands(REQUIRED_COMMANDS)
+    require_x11_display()
+    if not SAMPLE_FILE.is_file():
+        raise RuntimeError(f"Screenshot sample not found: {SAMPLE_FILE}")
+    output_dir = cast(Path, args.output_dir).resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    schemes = cast(list[str], args.scheme) or SCHEMES
+
+    for scheme in schemes:
+        output = capture_scheme(scheme, output_dir)
+        print(output.relative_to(REPO_DIR))
+    print(render_og_preview(output_dir).relative_to(REPO_DIR))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (RuntimeError, subprocess.CalledProcessError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        raise SystemExit(1) from error

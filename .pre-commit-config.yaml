@@ -1,0 +1,71 @@
+---
+default_stages: [pre-commit]
+exclude: |
+  (?x)^(
+      build/.*|
+      chiroptera.egg-info/.*
+  )$
+repos:
+    ###########################################################################
+    # general
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v6.0.0
+      hooks:
+          - id: check-added-large-files
+          - id: check-ast
+          - id: check-builtin-literals
+          - id: check-executables-have-shebangs
+          - id: check-json
+          - id: check-merge-conflict
+          - id: check-shebang-scripts-are-executable
+          - id: check-toml
+          - id: check-xml
+          - id: check-yaml
+          - id: end-of-file-fixer
+          - id: forbid-new-submodules
+          - id: mixed-line-ending
+          - id: name-tests-test
+          - id: pretty-format-json
+            args: [--autofix, --no-sort-keys]
+          - id: sort-simple-yaml
+          - id: trailing-whitespace
+
+    - repo: https://github.com/jumanjihouse/pre-commit-hooks
+      rev: 3.0.0
+      hooks:
+          - id: markdownlint
+            exclude: AGENTS.md
+          - id: script-must-have-extension
+          - id: script-must-not-have-extension
+          - id: shellcheck
+
+    ###########################################################################
+    #  python
+    - repo: https://github.com/psf/black
+      # Black 26.5.1 requires Python 3.10+, while the project supports 3.9.
+      rev: 25.11.0
+      hooks:
+          - id: black
+            language_version: python3
+
+    - repo: https://github.com/pre-commit/mirrors-mypy
+      rev: v1.19.1
+      hooks:
+          - id: mypy
+            files: ^chiroptera/
+    - repo: https://github.com/asottile/pyupgrade
+      # The final pyupgrade release that supports Python 3.9.
+      rev: v3.20.0
+      hooks:
+          - id: pyupgrade
+
+    - repo: https://github.com/pycqa/isort
+      rev: 6.0.1
+      hooks:
+          - id: isort
+
+    - repo: https://github.com/pycqa/pylint
+      rev: v3.3.9
+      hooks:
+          - id: pylint
+            files: ^chiroptera/
