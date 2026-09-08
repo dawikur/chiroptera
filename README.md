@@ -91,7 +91,7 @@ ratios:
 
 **Dark mode (normal contrast)**:
 
-- `fg` on `bg`: **4.66:1** (meets WCAG AA for normal text)
+- `fg` on `bg`: **4.96:1** (meets WCAG AA for normal text)
 - `{color}.bright` on `bg`: **≥4.5:1** (all colors meet WCAG AA for highlighted syntax)
 - `{color}.dim` on `bg.dim`: **~1.2:1** (intentionally low - subtle background highlights)
 
@@ -99,32 +99,32 @@ ratios:
 
 | Mode | Contrast | Background | Foreground | Ratio |
 |------|----------|------------|------------|-------|
-| dark | hard | `#2d2d2e` | `#a4a29b` | **5.39:1** |
-| dark | normal | `#373737` | `#a4a29b` | **4.66:1** |
-| dark | soft | `#424141` | `#a4a29b` | **3.98:1** |
-| light | hard | `#eae7db` | `#5d5c5a` | **5.39:1** |
-| light | normal | `#dddacf` | `#5d5c5a` | **4.77:1** |
-| light | soft | `#d0cec3` | `#5d5c5a` | **4.23:1** |
+| dark | hard | `#272625` | `#a19f97` | **5.70:1** |
+| dark | normal | `#32302e` | `#a19f97` | **4.96:1** |
+| dark | soft | `#3c3b38` | `#a19f97` | **4.23:1** |
+| light | hard | `#eae7db` | `#585652` | **5.91:1** |
+| light | normal | `#dcd9ce` | `#585652` | **5.18:1** |
+| light | soft | `#cfccc1` | `#585652` | **4.55:1** |
 
 > [!NOTE]
 > The `normal` variant meets WCAG AA (4.5:1) for normal text. Contrast ratios
-> are closely matched between dark and light modes (difference < 0.25), ensuring
+> are closely matched between dark and light modes, ensuring
 > a consistent reading experience regardless of mode. The `hard` variant
 > exceeds WCAG AA for normal text (**~5.3:1**). All bright color variants
 > (`color.bright`) meet WCAG AA standards (**≥4.5:1**) for important syntax
-> elements. The `soft` variant uses `fg.bright` and `color.bright` for text
-> that must meet WCAG AA.
+> elements. The `soft` variant uses lower contrast than `normal`; use
+> `fg.bright` and `color.bright` when maximum readability is required.
 
 **Bright colors WCAG AA compliance** (for syntax highlighting):
 
 | Color | Dark Mode | Light Mode |
 |-------|-----------|------------|
-| red.bright | **6.16:1** ✅ | **6.63:1** ✅ |
-| green.bright | **6.16:1** ✅ | **6.71:1** ✅ |
-| yellow.bright | **6.16:1** ✅ | **6.69:1** ✅ |
-| blue.bright | **6.19:1** ✅ | **6.70:1** ✅ |
-| magenta.bright | **6.18:1** ✅ | **6.67:1** ✅ |
-| cyan.bright | **6.17:1** ✅ | **6.68:1** ✅ |
+| red.bright | **6.61:1** ✅ | **7.25:1** ✅ |
+| green.bright | **6.64:1** ✅ | **7.28:1** ✅ |
+| yellow.bright | **6.65:1** ✅ | **7.28:1** ✅ |
+| blue.bright | **6.63:1** ✅ | **7.33:1** ✅ |
+| magenta.bright | **6.64:1** ✅ | **7.29:1** ✅ |
+| cyan.bright | **6.66:1** ✅ | **7.29:1** ✅ |
 
 > [!TIP]
 > Use the `hard` contrast variant if you need higher, WCAG AA-compliant

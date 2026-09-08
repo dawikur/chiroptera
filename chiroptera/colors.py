@@ -3,6 +3,7 @@
 
 from copy import deepcopy
 from typing import Callable, Optional, cast
+from warnings import catch_warnings, filterwarnings
 
 import numpy as np
 import numpy.typing as npt
@@ -25,7 +26,7 @@ class BaseColors(dict[str, str]):
         super().__init__()
         # Background and foreground tint base colors
         # Inspired by gruvbox: https://github.com/morhetz/gruvbox
-        self["dark"] = "#242425"
+        self["dark"] = "#1e1d1c"
         self["light"] = "#f8f5e8"
 
         # Chromatic colors optimized for WCAG AA contrast
@@ -81,10 +82,23 @@ class Colors(dict[str, Callable[[float], str]]):
 
         def __rgb_from_lab(lab: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
             """Convert LAB to sRGB without clipping out-of-gamut channels."""
-            xyz = cast(
-                npt.NDArray[np.float64],
-                skimage.color.lab2xyz(lab),  # pyright: ignore[reportUnknownMemberType]
-            )
+            # Out-of-gamut LAB values are expected here: the caller reduces
+            # chroma afterwards until the converted RGB value fits sRGB.
+            # scikit-image warns when an intermediate XYZ component is
+            # negative, even though that value is useful for detecting the
+            # out-of-gamut condition.
+            with catch_warnings():
+                filterwarnings(
+                    "ignore",
+                    message="Conversion from CIE-LAB to XYZ color space resulted in.*",
+                    category=UserWarning,
+                )
+                xyz = cast(
+                    npt.NDArray[np.float64],
+                    skimage.color.lab2xyz(  # pyright: ignore[reportUnknownMemberType]
+                        lab
+                    ),
+                )
             conversion_matrix: npt.NDArray[np.float64] = np.array(
                 [
                     [3.24048134, -0.96925495, 0.05564664],
