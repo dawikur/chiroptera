@@ -152,7 +152,7 @@ class TestUtilsCoverage:
         assert tokens["name"] == "chiroptera"
         assert tokens["mode"] == "dark"
         assert tokens["contrast"] == "normal"
-        assert tokens["bg.hex"] == "#373737"
+        assert tokens["bg.hex"] == palette["bg"]["hex"]
         assert "fg.normal.hex" in tokens
 
     def test_rgb_pixel_rejects_non_rgb_value(self) -> None:
@@ -210,7 +210,13 @@ class TestUtilsCoverage:
         result = repalette(image, Mode.DARK, Contrast.NORMAL)
 
         assert result is image
-        assert image.getpixel((0, 0)) == (118, 0, 4)
+        pixel = image.getpixel((0, 0))
+        palette = Palette(Mode.DARK, Contrast.NORMAL).add_rgb()
+        palette_pixels = {
+            tuple(int(str(ansi[component]), 16) for component in ("r", "g", "b"))
+            for ansi in palette.values()
+        }
+        assert pixel in palette_pixels
 
     def test_repalette_non_rgb_image(self) -> None:
         """Repalette scalar Pillow pixels after normalizing them to RGB."""

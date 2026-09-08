@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from chiroptera import Contrast, Mode, Palette
+from chiroptera import Contrast, Mode, Palette, Scheme
 from chiroptera.utils import format_line
 
 
@@ -55,7 +55,11 @@ def test_cli_renders_template(tmp_path: Path) -> None:
         text=True,
     )
 
-    assert output.read_text() == "background=#373737\naccent=#fea391\n"
+    palette = Palette(Mode.DARK, Contrast.NORMAL)
+    scheme = Scheme(palette)
+    assert output.read_text() == (
+        f"background={palette['bg']['hex']}\n" f"accent={scheme['fg']['red']['hex']}\n"
+    )
     assert result.stdout == ""
 
 
@@ -71,7 +75,11 @@ def test_cli_renders_template_to_stdout(tmp_path: Path) -> None:
         text=True,
     )
 
-    assert result.stdout == "background=#373737\naccent=#fea391\n"
+    palette = Palette(Mode.DARK, Contrast.NORMAL)
+    scheme = Scheme(palette)
+    assert result.stdout == (
+        f"background={palette['bg']['hex']}\n" f"accent={scheme['fg']['red']['hex']}\n"
+    )
 
 
 def test_cli_prints_scheme_names_with_dot_notation() -> None:

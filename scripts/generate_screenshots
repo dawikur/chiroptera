@@ -28,7 +28,7 @@ from typing import cast
 
 REPO_DIR = Path(__file__).resolve().parent.parent
 SAMPLE_FILE = REPO_DIR / "site" / "screenshot_sample.py"
-DEFAULT_OUTPUT_DIR = REPO_DIR / "site" / "assets" / "screenshots"
+DEFAULT_OUTPUT_DIR = REPO_DIR / "site" / "assets"
 SCHEMES = (
     "chiroptera_dark_hard",
     "chiroptera_dark_normal",
@@ -133,6 +133,54 @@ def stop_terminal(terminal: subprocess.Popen[str]) -> None:
         _ = terminal.wait()
 
 
+def wait_for_nvim(
+    socket: Path,
+    session: str,
+    timeout: float = 10.0,
+) -> None:
+    """Wait until Neovim has rendered the sample file in the tmux pane."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        pane = run(
+            [
+                "tmux",
+                "-S",
+                str(socket),
+                "capture-pane",
+                "-p",
+                "-t",
+                f"{session}:0.0",
+            ],
+            capture_output=True,
+        ).stdout
+        if "class Mode" in pane:
+            return
+        time.sleep(0.1)
+    raise RuntimeError("Timed out waiting for Neovim to render the sample file")
+
+
+def wait_for_shell(socket: Path, session: str, timeout: float = 10.0) -> None:
+    """Wait until the shell in the new tmux pane has produced a prompt."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        pane = run(
+            [
+                "tmux",
+                "-S",
+                str(socket),
+                "capture-pane",
+                "-p",
+                "-t",
+                f"{session}:0.0",
+            ],
+            capture_output=True,
+        ).stdout
+        if pane.strip():
+            return
+        time.sleep(0.1)
+    raise RuntimeError("Timed out waiting for the screenshot shell")
+
+
 def nvim_command(scheme: str) -> list[str]:
     """Return the Neovim invocation used in every captured terminal."""
     setup = " | ".join(
@@ -172,7 +220,7 @@ def nvim_command(scheme: str) -> list[str]:
 def capture_scheme(scheme: str, output_dir: Path) -> Path:
     """Open ``scheme`` in tmux and save the terminal window as a PNG."""
     title = f"{WINDOW_TITLE_PREFIX}{scheme}"
-    output = output_dir / f"{scheme}.png"
+    output = output_dir / "screenshots" / f"{scheme}.png"
 
     with tempfile.TemporaryDirectory(prefix="chiroptera-screenshot-") as temp_dir:
         socket = Path(temp_dir) / "tmux.sock"
@@ -216,6 +264,7 @@ def capture_scheme(scheme: str, output_dir: Path) -> Path:
                     ",alacritty:RGB",
                 ]
             )
+            wait_for_shell(socket, session)
             _ = run(
                 [
                     "tmux",
@@ -264,7 +313,8 @@ def capture_scheme(scheme: str, output_dir: Path) -> Path:
             ) as terminal:
                 try:
                     window_id = find_window_id(title, terminal)
-                    time.sleep(0.5)
+                    wait_for_nvim(socket, session)
+                    time.sleep(0.2)
                     _ = run(["import", "-window", window_id, str(output)])
                 finally:
                     stop_terminal(terminal)
@@ -327,6 +377,7 @@ def main() -> int:
         raise RuntimeError(f"Screenshot sample not found: {SAMPLE_FILE}")
     output_dir = cast(Path, args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "screenshots").mkdir(parents=True, exist_ok=True)
     schemes = cast(list[str], args.scheme) or SCHEMES
 
     for scheme in schemes:

@@ -40,14 +40,13 @@ class Palette(dict[str, Ansi]):
         # For DARK mode: bg is dark (near min), fg is mid-range
         # For LIGHT mode: bg is light (near max), fg is darker for better contrast
         # Foreground is fixed per mode; contrast variants affect only backgrounds.
+        middle = colors.min + ((colors.max - colors.min) / 2)
         if mode == Mode.DARK:
-            fg = round((colors.min + colors.max) / 2) + 2.5
+            fg = middle + 2.5
             bg = colors.min + 1  # Near darkest, but not absolute min
             step = 1  # Positive step moves toward lighter colors
         else:
-            fg = (
-                round((colors.min + colors.max) / 2) - 3.5
-            )  # Darker for closely matched contrast and WCAG AA
+            fg = middle - 3.5  # Darker for closely matched contrast and WCAG AA
             bg = colors.max - 1  # Near lightest, but not absolute max
             step = -1  # Negative step moves toward darker colors
 
