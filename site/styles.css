@@ -7,6 +7,13 @@
 @property --accent-warm { syntax: "<color>"; inherits: true; initial-value: #f89c41; }
 
 :root {
+	--ui-footer-border: var(--border);
+	--ui-footer-ink: var(--ink);
+	--ui-footer-accent: var(--accent-warm);
+	--ui-footer-muted: var(--ink);
+	--ui-footer-bg: var(--bg);
+	--ui-footer-copy: var(--copy);
+
 	--ui-focus-ring: var(--accent-warm);
 	--ui-control-border: var(--border);
 	--ui-control-bg: var(--panel);
@@ -53,7 +60,7 @@ body {
 .page { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: calc(var(--space-5) + 68px) 0 var(--space-6); }
 .hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: center; gap: var(--space-5); min-height: min(730px, calc(100vh - 32px)); }
 .copy { min-width: 0; }
-.feature-strip, .actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .ui-control-dock { --ui-control-dock-bg: radial-gradient(ellipse at center, color-mix(in srgb, var(--bg) 86%, transparent), transparent 72%); }
 .contrast-note { margin: calc(var(--space-4) * -1) 0 var(--space-4); color: var(--muted); font-size: .8rem; font-weight: 700; }
 .eyebrow { margin: 0 0 var(--space-1); color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
@@ -87,80 +94,3 @@ figcaption { position: relative; margin-top: 12px; color: var(--muted); font-siz
 .principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); border-top: 1px solid var(--border); padding: var(--space-6) 0; }.principles article { border-top: 2px solid var(--accent); padding-top: var(--space-2); }.principles h2 { font-size: 1.05rem; letter-spacing: 0; }.principles p { margin: var(--space-1) 0 0; color: var(--copy); font-size: .93rem; line-height: 1.55; }
 @media (max-width: 960px) { .hero, .editor-preview, .generator, .template-pair { grid-template-columns: 1fr; min-height: 0; }.hero { gap: var(--space-3); } h1 { font-size: clamp(3.1rem, 9vw, 5.4rem); }.wing-figure img { width: min(82%, 400px); }.palette { grid-template-columns: repeat(3, minmax(0, 1fr)); }.palette-group, .palette-group--half { grid-column: span 3; }.palette-group-swatches { grid-template-columns: repeat(3, minmax(0, 1fr)); }.principles { grid-template-columns: 1fr; }.section-head { align-items: start; flex-direction: column; } }
 @media (max-width: 560px) { .page { width: min(100% - 20px, 1120px); }.editor-preview, .generator, .palette-section, .lab-section, .principles { padding: var(--space-5) 0; }.palette { gap: 8px; }.palette-group-swatches, .palette-group--half .palette-group-swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
-
-.donation-footer {
-	padding: 32px 20px 40px;
-	border-top: 1px solid var(--border);
-	text-align: center;
-	color: var(--ink);
-}
-
-.donation-icon {
-	display: block;
-	margin: 0 auto 12px;
-	color: var(--accent-warm);
-}
-
-.donation-footer h2 {
-	margin: 0;
-	font-size: 1.25rem;
-}
-
-.donation-footer p {
-	margin: 12px auto 20px;
-	color: var(--ink);
-	line-height: 1.6;
-}
-
-.donation-link {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	min-height: 44px;
-	padding: 8px 24px;
-	border-radius: 999px;
-	background: var(--ink);
-	color: var(--bg);
-	font-weight: 600;
-	text-decoration: none;
-}
-
-.donation-link:hover {
-	background: var(--accent-warm);
-}
-
-.donation-link:focus-visible {
-	outline: 2px solid var(--ui-focus-ring);
-	outline-offset: 4px;
-}
-
-.footer-nav {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: center;
-	gap: 8px 24px;
-	margin-bottom: 28px;
-	font-size: 0.9rem;
-	color: var(--ink);
-}
-
-.footer-nav a {
-	display: inline-flex;
-	align-items: center;
-	min-height: 44px;
-	color: var(--copy);
-	text-decoration: none;
-}
-
-.footer-nav a:hover,
-.footer-nav a[aria-current="page"] {
-	color: var(--accent-warm);
-	text-decoration: underline;
-	text-underline-offset: 4px;
-}
-
-.footer-nav a:focus-visible {
-	outline: 2px solid var(--ui-focus-ring);
-	outline-offset: 4px;
-}
